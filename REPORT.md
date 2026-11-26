@@ -24,6 +24,7 @@ code, seeds and raw output in this repository.
 | Is Kuznyechik weaker than with a random S-box? | **No.** Random S-boxes are easier to attack on every attack metric we measured. |
 | Attack on the full 10 rounds? | **None known or found.** The family where the gain appears cannot be used at ≥ 3 rounds at all. |
 | Practical key recovery? | Only for **2 rounds**, and that attack works for *any* S-box. |
+| Known classes of design-level trapdoors (partition, linear/nonlinear invariants, algebraic)? | **None found** in π, L, the constants or the key schedule. The one structural surprise in L is explained by a public MDS construction. |
 | Proof of a deliberate backdoor? | **No.** There is strong evidence the published design story is incomplete. That is a different claim. |
 
 ## Background: why people suspect a backdoor
@@ -211,6 +212,115 @@ Not reproduced. The authors call it exploratory, because configurations were
 selected after preliminary screening. It also omits the initial whitening key,
 so it is **not** standard Kuznyechik. It carries no confirmatory weight.
 
+## Design-level backdoor audit (stages A–D)
+
+The question here is broader than R1–R7: does Kuznyechik contain any of the
+*known classes* of design-level trapdoors, catalogued in the SoK by Shah Fahd
+(ePrint 2026/2582), or anything else that gives an informed attacker an edge?
+Scripts are in `experiments/backdoor/` and outputs in `results/backdoor/`.
+
+### A. S-box trapdoor audit (`sbox_audit.py --n 1000 --seed 5`)
+
+**Why the partition test is complete.** A partition that survives XOR with
+*every* round key must be the coset partition of an F₂-subspace V. The S-box
+maps V-cosets into W-cosets exactly when D_vS(x) ⊕ D_vS(0) ∈ W for all v ∈ V
+and all x. So if r(v) = dim span{D_vS(x) ⊕ D_vS(0)} equals 8 for every v ≠ 0,
+no partition trapdoor with dim W < 8 exists. Paterson's KG-DES and BEA-1 both
+belong to this class.
+
+The same argument extends to the full 128-bit state. Suppose V has an active
+byte j. Then W must contain the whole byte j. L sends any nonzero byte to all
+16 bytes, since the branch number is 17. So after one more S-layer, W is the
+entire space. Hence **no nontrivial invariant coset partition or long subspace
+trail exists for any number of rounds.**
+
+Tests run on π and π⁻¹:
+- partition trapdoors;
+- linear structures;
+- F₂ relations of degree ≤ 2 and ≤ 3 between x and S(x);
+- nonlinear invariants of degree ≤ 2;
+- polynomial density over the hidden field T and over K.
+
+**Positive controls.** A planted trapdoor S-box is detected (min r = 4, 337
+linear structures). The AES S-box shows its known 39 quadratic relations.
+
+| test | π | random (n=1000) | affine copies (n=1000) |
+|---|---|---|---|
+| min r(v) for π / π⁻¹ | 8 / 8 | always 8 / 8 | always 8 / 8 |
+| linear structures | 0 | 0 | 0 |
+| quadratic relations | 0 | 0 | 0 |
+| cubic relations | 441 (= 697 − 256, generic) | 441 | 441 |
+| invariants of degree ≤ 2 (π / π⁻¹) | 0 / 0 | 0 | 0 |
+| nonzero polynomial coefficients over T / K | 255 / 255 (maximum) | median 254 | median 254 |
+
+**Result.** Nothing was found. On every one of these tests π is
+indistinguishable from random. Even over its own hidden field, π is a fully
+dense polynomial. The TKlog partitions (Perrin) pair multiplicative cosets with
+additive cosets, and XOR with the key does not preserve multiplicative cosets.
+That is why the TKlog structure is not a partition trapdoor.
+
+### B. Linear layer, constants and fields (`layer_keys_audit.py`, `linear_eigen.py`)
+
+- **Round constants.** C_i = L(Vec₁₂₈(i)) for all 32 constants, matching the RFC
+  test values. They have **no free parameters**; they are a fixed function of L.
+- **Field polynomials.** 0x11D, the hidden field of π, is the lexicographically
+  *first* of the 16 primitive polynomials of degree 8. It is the textbook
+  default, for example in Reed–Solomon codes. 0x1C3, the field of L, is number
+  13. Neither choice needs explaining.
+- **Spectral structure of L (anomaly found and explained).**
+  - The characteristic polynomial of the LFSR matrix R (L = R¹⁶) splits into
+    16 distinct linear factors over GF(2⁸). For a random polynomial of degree 16
+    the chance is of order 1/16! ≈ 10⁻¹³.
+  - The roots are exactly **β¹²⁰, …, β¹³⁵ for β = α⁶⁴ = 0xA0**: 16 consecutive
+    powers. This is the BCH-style recursive MDS construction of Augot–Finiasz
+    (FSE 2014), a public design method.
+  - It also explains the palindromic coefficients of L: the exponent range is
+    symmetric, 120 + 135 = 255.
+  - It explains the two eigenvalues of order 17, which give a 16-dimensional
+    F₂-subspace fixed by L¹⁷. Random 16×16 matrices have none.
+  - The "17" matching the 17 TKlog cosets is arithmetic: 255 = 3·5·17. The
+    TKlog cosets live in field T and these eigenvalues live in field K.
+  - The structure belongs to L alone. The S-layer separates consecutive L's, and
+    test A shows it preserves no subspace structure.
+- **Not done.** No controls using random MDS layers of comparable quality.
+  Sampling 16×16 MDS matrices over GF(2⁸) is itself a research task.
+
+### C. Advantage of a holder of the TKlog secret
+
+1. **The secret is no longer secret.** The decomposition has been public since
+   2016 and 2019. Whatever it enables is now open to everyone. Every experiment
+   in R3–R6 and A was run *as* an attacker who knows the TKlog. A remaining
+   private advantage would have to come from knowledge **beyond** the TKlog.
+2. **XOR-differential and linear cryptanalysis do not depend on the field.**
+   DDT and LAT are defined over F₂, so describing π through a different field
+   changes neither. Only multiplicative relations depend on the field. XOR key
+   addition destroys them, except for the low-rank transfer of Theorem 6, and
+   R3–R6 measured exactly that.
+3. **Algebraic attacks.** The TKlog writes π through the discrete logarithm.
+   Inside the cipher the S-box input is x ⊕ k, and log(x ⊕ k) bears no relation
+   to log x. Test A confirms it: π has no low-degree relations and no sparse
+   polynomial form even over T.
+
+**Conclusion.** Knowing the TKlog gives no measurable advantage beyond what R6
+already showed: a few bits in characteristics that cannot be used from
+3 rounds on.
+
+### D. Key schedule (`layer_keys_audit.py`)
+
+- The master key follows from **any** pair of consecutive round keys
+  (K₂ᵢ₊₁, K₂ᵢ₊₂) by inverting the key-schedule Feistel network. Verified on
+  20/20 random keys (seed 31).
+- This is a known structural property shared by Feistel-type key schedules,
+  not a trapdoor. It matters only once an attack has already recovered two
+  consecutive 128-bit round keys.
+- (K₁, K₂) *is* the master key, so there are no equivalent master keys.
+- Weak-key classes and related-key attacks were **not** studied.
+
+### E. Streebog
+
+Not studied. The conclusions above do not automatically carry over to Streebog,
+which uses π in a different construction.
+
 ## Issues found in the earlier scripts
 
 - `experiments/sbox_analysis.py` computes nonlinearity from the 8 single output
@@ -254,6 +364,9 @@ The reference cipher (`src/gost/kuznechik.py`) and the tables in
 - Differential clustering (beyond single characteristics) for the c = 02/e1
   classes at 3–4 rounds, compared against A-controls.
 - A larger N1 control (n ≥ 100 per family; about 4 h on 16 cores).
+- Controls with random MDS linear layers of comparable quality.
+- Weak-key and related-key analysis of the key schedule.
+- An independent audit of Streebog's use of π.
 - An independent audit of this repository by a third party.
 
 ## Reproduction
@@ -268,6 +381,9 @@ python3 experiments/verify/control_large.py --n 1000 --seed 1        # R5 (~5 mi
 python3 experiments/verify/control_large.py --n 8 --seed 98 --n1     # R4 N1 (~27 min)
 python3 experiments/verify/char_search.py --n 2000 --seed 4          # R6 (~13 min)
 python3 experiments/verify/check_controls.py              # control sanity, slow cross-check
+python3 experiments/backdoor/sbox_audit.py --n 1000 --seed 5        # A (~1 min)
+python3 experiments/backdoor/layer_keys_audit.py           # B, D
+python3 experiments/backdoor/linear_eigen.py               # B, spectrum of L (~6 min)
 ```
 
 ## References
@@ -279,4 +395,6 @@ python3 experiments/verify/check_controls.py              # control sanity, slow
 - L. Perrin. FAQ on the S-box π [who.paris.inria.fr/Leo.Perrin/pi.html](https://who.paris.inria.fr/Leo.Perrin/pi.html).
 - P. Stanica, R. Dutta, B. Mandal. *Extended Differential Cryptanalysis of
   Kuznyechik.* arXiv:2507.02181v4 [arXiv:2507.02181](https://arxiv.org/abs/2507.02181).
+- Shah Fahd. *SoK: Design-Level Backdoors in Block Ciphers: Constructions, Detection, and Key Recovery.* [ePrint 2026/2582](https://eprint.iacr.org/2026/2582).
+- D. Augot, M. Finiasz. *Direct Construction of Recursive MDS Diffusion Layers Using Shortened BCH Codes.* FSE 2014.
 - [RFC 7801](https://www.rfc-editor.org/rfc/rfc7801), *GOST R 34.12-2015: Block Cipher "Kuznyechik"*.
