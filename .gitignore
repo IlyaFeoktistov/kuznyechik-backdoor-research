@@ -1,0 +1,11 @@
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Vendored third-party libraries (pypdf, installed locally via pip --target)
+pylibs/
+
+# Virtual environments
+.venv/
+venv/
