@@ -241,6 +241,14 @@ Tests run on π and π⁻¹:
 - nonlinear invariants of degree ≤ 2;
 - polynomial density over the hidden field T and over K.
 
+**Scope of the completeness claim.** The proof covers exactly the partitions
+that are invariant under XOR with *all* keys, i.e. coset partitions, at every
+round. It does **not** cover:
+- partitions that survive only for a restricted key class (weak keys);
+- nonlinear invariants of degree > 2;
+- invariants that combine several S-boxes non-separably;
+- structures that are not partitions at all.
+
 **Positive controls.** A planted trapdoor S-box is detected (min r = 4, 337
 linear structures). The AES S-box shows its known 39 quadratic relations.
 
@@ -282,6 +290,19 @@ That is why the TKlog structure is not a partition trapdoor.
     TKlog cosets live in field T and these eigenvalues live in field K.
   - The structure belongs to L alone. The S-layer separates consecutive L's, and
     test A shows it preserves no subspace structure.
+- **How much freedom did the designers have?** (`bch_params.py`)
+  - The parameters (field 0x1C3, β = α⁶⁴, l = 120) reproduce the RFC
+    coefficients of L **exactly**, with no additional parameter.
+  - In field 0x1C3 the construction admits 16 320 distinct matrices R.
+    Requiring a palindromic polynomial forces l = 120 and leaves 64 candidates.
+  - Of these 64, only 8 have the maximum of two coefficients equal to 1 (free
+    multiplications in hardware). Those 8 form **one Frobenius orbit**
+    (c ↦ c²), and L is one of them.
+  - The same 64/8 split holds in each of the 16 fields.
+  - So once "BCH-type, palindromic, cheapest" is fixed, the only unexplained
+    choices are the field (1 of 16) and the orbit representative (1 of 8):
+    about 7 bits of freedom. That is far too little to plant a hidden
+    property in L by search.
 - **Not done.** No controls using random MDS layers of comparable quality.
   Sampling 16×16 MDS matrices over GF(2⁸) is itself a research task.
 
@@ -384,6 +405,7 @@ python3 experiments/verify/check_controls.py              # control sanity, slow
 python3 experiments/backdoor/sbox_audit.py --n 1000 --seed 5        # A (~1 min)
 python3 experiments/backdoor/layer_keys_audit.py           # B, D
 python3 experiments/backdoor/linear_eigen.py               # B, spectrum of L (~6 min)
+python3 experiments/backdoor/bch_params.py                 # B, design freedom of L (~1 min)
 ```
 
 ## References

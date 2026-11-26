@@ -1,0 +1,93 @@
+{
+ "reproduces_rfc": true,
+ "family": 16320,
+ "palindromic": 64,
+ "ones_hist": {
+  "2": 8,
+  "0": 56
+ },
+ "ours_ones": 2,
+ "best_is_frobenius_orbit": true,
+ "per_field": {
+  "0x11d": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x12b": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x12d": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x14d": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x15f": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x163": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x165": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x169": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x171": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x187": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x18d": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x1a9": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x1c3": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x1cf": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x1e7": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  },
+  "0x1f5": {
+   "palindromic": 64,
+   "max_ones": 2,
+   "n_with_max": 8
+  }
+ }
+}
