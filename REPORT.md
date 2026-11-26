@@ -20,8 +20,8 @@ code, seeds and raw output in this repository.
 |---|---|
 | Does π have the TKlog structure? | **Yes**, reproduced byte for byte (256/256). |
 | Does it cause anomalous differential properties? | **Yes**: extended differential uniformity 64/33/21 vs ≤ 15 for 4000 controls. |
-| Does the structure help an attacker beyond equally good S-boxes? | **Only in one narrow sense**: about 4–6 bits in single-characteristic probability at 2–3 rounds (z > 12). Not in the only working attack. |
-| Is Kuznyechik weaker than with a random S-box? | **No.** Random S-boxes are easier to attack on every attack metric we measured. |
+| Does the structure help an attacker? | **Only on paper**: an attacker using the hidden field gains about 4–8 bits in single-characteristic probability at 2–4 rounds. The characteristics stay far beyond any attack (2⁻¹⁶⁷ at 3 rounds). No gain in the only working attack. The gain belongs to π itself, not to its pairing with L (stage F). |
+| Is Kuznyechik weaker than with a random S-box? | **Only marginally, at 2 rounds**: about 4 bits in the best 2-round characteristic. At 3–4 rounds π is at the median of random S-boxes. In the working 2-round attack, random S-boxes are easier. |
 | Attack on the full 10 rounds? | **None known or found.** The family where the gain appears cannot be used at ≥ 3 rounds at all. |
 | Practical key recovery? | Only for **2 rounds**, and that attack works for *any* S-box. |
 | Known classes of design-level trapdoors (partition, linear/nonlinear invariants, algebraic)? | **None found** in π, L, the constants or the key schedule. The one structural surprise in L is explained by a public MDS construction. |
@@ -166,6 +166,11 @@ scripts.
   the resolution limit). On attack cost (N2) it is no better than the
   controls, with p = 1.0.
 
+  *Caveat (see stage F):* these metrics use only K-field multipliers. For an
+  affine copy, the conjugated hidden-field multiplier recovers the same
+  120-solution transition. The affine controls therefore lose the anomaly
+  only for an attacker restricted to field K.
+
 ### R6. Characteristic gain over 2–3 rounds (paper §7) against controls
 
 - **Hypothesis.** The extended-differential gain in the 16→1 and 16→1→16
@@ -190,12 +195,18 @@ scripts.
     reproducible gain of about 5–6 bits at the median. The gain is
     deterministic and explained by R3; it is not a statistical fluke.
   - Against random S-boxes, π is still stronger.
+  - **Corrected in stage F.** Both points hold only for an attacker who uses
+    K-field multipliers. An attacker who also uses the hidden field gains as
+    much against affine copies as against π, and at 2 rounds π is then about
+    4 bits weaker than a typical random S-box.
 - **Why this gain is not an attack.**
   - At 2 rounds a 2⁻⁸⁴ characteristic needs about 2⁸⁴ pairs, while R4 breaks
     2 rounds with 2¹⁸ queries for any S-box.
   - At 3 rounds the best characteristic is 2⁻¹⁶⁹·⁷, below 2⁻¹²⁸. It cannot be
     used even with the full codebook.
-  - The paper reports the gain shrinking to about 1.6 bits at 4 rounds.
+  - At 4 rounds the gain is about 1.6 bits for the paper's attacker and about
+    4.4 bits for the fair attacker of stage F, on characteristics of about
+    2⁻¹⁹⁶.
 
   This family is therefore closed as a route to key recovery at any number of
   rounds.
@@ -303,8 +314,8 @@ That is why the TKlog structure is not a partition trapdoor.
     choices are the field (1 of 16) and the orbit representative (1 of 8):
     about 7 bits of freedom. That is far too little to plant a hidden
     property in L by search.
-- **Not done.** No controls using random MDS layers of comparable quality.
-  Sampling 16×16 MDS matrices over GF(2⁸) is itself a research task.
+- **Controls with other MDS layers** were run in stage F (Cauchy-class random
+  MDS layers and all other palindromic BCH layers).
 
 ### C. Advantage of a holder of the TKlog secret
 
@@ -342,6 +353,107 @@ already showed: a few bits in characteristics that cannot be used from
 Not studied. The conclusions above do not automatically carry over to Streebog,
 which uses π in a different construction.
 
+## Stage F: interaction of π with the linear layer
+
+Scripts are in `experiments/interaction/` and outputs in `results/interaction/`.
+
+**What depends on L.** The metrics of R3 and R5 (δ_c, E_c, I(K;B)) involve only
+the S-box and a field multiplication; L does not enter them. Replacing L leaves
+them unchanged *by definition*, so they were not recomputed. Only the
+characteristic scores (R6) and the attack cost N1 (R4) depend on L.
+
+**A fairer attacker (correction to R5/R6).** The input multiplier in an
+extended differential is chosen by the *attacker*. Any invertible F₂-linear map
+M works: whitening still gives the effective row a ⊕ (I ⊕ M)K. R5, R6 and the
+paper restrict the attacker to multiplication in the Kuznyechik field K. An
+attacker who knows the (public) TKlog can multiply in the hidden field T
+directly; for π the hidden transition then has 120 solutions instead of 64.
+Against an affine copy A∘π∘B, the same attacker uses B⁻¹·c_T·B and finds
+exactly the same 120. This was checked for every copy. We therefore report two
+attackers. Both take the best of the classical attack and their multiplier set:
+- **K\***: classical, plus K-field multipliers (the paper's attacker);
+- **KT\***: classical, plus K-field multipliers, plus T-field multipliers
+  (conjugated for affine copies).
+
+**Random MDS layers** (`mds.py`). Cauchy matrices M[i,j] = 1/(xᵢ + yⱼ) over
+0x1C3 with disjoint random point sets, followed by random row/column
+permutations and nonzero scalings. This samples the Cauchy-equivalent
+**subclass** of MDS matrices, not all MDS matrices uniformly. The generator
+never uses the Kuznyechik matrix. Independent checks run on the Kuznyechik L
+and on generated layers:
+- inverse exists;
+- all 1×1, 2×2 and 3×3 minors are nonzero (exhaustive);
+- 2000 random larger minors are nonzero;
+- branch number 17 on all inputs of weight 1 and 2 (exhaustive).
+
+A matrix with one entry set to zero is correctly rejected. For the Kuznyechik L
+the computed inverse equals the reference L⁻¹.
+
+**Scorer** (`char_general.py`). It reproduces the paper's 2-, 3- and 4-round
+values exactly. For c = 01: −89.1504 / −174.30 / −200.8105. For c = 02:
+−83.9801 / −169.72 / −199.2480.
+
+**Groups** (`run_stage_f.py --n 200 --seed 2`; replication `--n 100 --seed 1`):
+
+| group | S-box | L | n |
+|---|---|---|---|
+| A | π | Kuznyechik | 1 |
+| B | π | random Cauchy MDS | 200 |
+| B′ | π | the other 63 palindromic BCH layers of field 0x1C3 | 63 |
+| C | affine copies of π | Kuznyechik | 200 |
+| D | affine copies of π | random Cauchy MDS | 200 |
+| R | random permutations | Kuznyechik | 200 |
+
+**Result for the fair attacker KT\*** (offset a = 0 allowed; log₂ probability;
+median [5 %, 95 %]; p = share of controls at least as good for the attacker as A):
+
+| rounds | A | B | B′ | C | D | R |
+|---|---|---|---|---|---|---|
+| 2 | **−81.29** | −83.45 [−85.18, −81.00], p = 0.085 | −83.36, p = 0.125 | −81.24, p = 0.53 | −83.49, p = 0.11 | −85.35 [−86.11, −84.28], **p = 0.005** |
+| 3 | **−166.92** | −169.18, p = 0.065 | −169.12, p = 0.125 | −166.72, p = 0.54 | −169.21, p = 0.09 | −167.29, p = 0.35 |
+| 4 | **−196.45** | −198.93, p = 0.09 | −199.29, p = 0.08 | −197.80, p = 0.24 | −199.02, p = 0.10 | −198.50, p = 0.10 |
+
+The attacker's gain over the classical attack of the *same* cipher is shown
+below. For random S-boxes, 508 extra linear multipliers give a gain of
+exactly 0.
+
+| rounds | A | B | B′ | C | D | R |
+|---|---|---|---|---|---|---|
+| 2 | 7.9 bits | 6.1 | 6.2 | 8.3 | 6.0 | 0 |
+| 3 | 7.4 | 5.9 | 5.9 | 7.9 | 5.9 | 0 |
+| 4 | 4.4 | 4.1 | 3.7 | 5.3 | 3.7 | 0 |
+
+The seed-1 run (n = 100) gives the same picture. In two random S-boxes no
+16→1→16→1 path is admissible, so their 4-round score is −∞.
+
+**Answers to the stage-F questions.**
+1. *Does the anomaly survive replacing L?* **Yes.** π keeps a gain of about
+   6 bits with any MDS layer, Cauchy or BCH. The anomaly belongs to π (the
+   TKlog), not to the pair (π, L).
+2. *How unusual is the Kuznyechik L?* Mildly. For the fair attacker, A sits at
+   about the 88–93rd percentile of the B and B′ distributions (p = 0.065–0.125).
+   Twelve comparisons were made, so this is not significant.
+3. *Is there a specific π–L interaction?* **No evidence.** Affine copies with
+   the same L (group C) are exactly as exploitable as π (p ≈ 0.5). The K-field
+   "alignment" of R5/R6 matters only to an attacker who does not use the hidden
+   field.
+4. *Does the BCH construction explain anything?* BCH layers behave like random
+   Cauchy layers (B′ ≈ B).
+5. *Practical advantage?* **No.** The best characteristics are 2⁻⁸¹ at 2 rounds
+   (already broken with 2¹⁸ queries for any S-box), then 2⁻¹⁶⁷ at 3 rounds and
+   2⁻¹⁹⁶ at 4 rounds. Both are below 2⁻¹²⁸, so even the full codebook cannot
+   use them.
+
+**What this corrects.** Under the fair attacker:
+- The claim in R5 and R6 that the gain is "specific to π compared with equally
+  good S-boxes" holds only for an attacker restricted to K-field multipliers.
+- The claim that "π is stronger than a random S-box" no longer holds at
+  2 rounds: π is about 4 bits weaker than the median random S-box, p = 0.005.
+  At 3 and 4 rounds π is at the median or 90th percentile of random S-boxes.
+- The gain at 4 rounds is about 4.4 bits, not about 1.6.
+
+None of this changes the absence of an attack.
+
 ## Issues found in the earlier scripts
 
 - `experiments/sbox_analysis.py` computes nonlinearity from the 8 single output
@@ -361,10 +473,13 @@ The reference cipher (`src/gost/kuznechik.py`) and the tables in
 1. **TKlog structure: confirmed**, byte for byte, with its full linear
    geometry.
 2. **Proven cryptographic weaknesses.** There is an extreme, structurally
-   explained anomaly in the extended differential tables (δ_c up to 64). It
-   gives about 5 bits of single-characteristic gain at 2–3 rounds compared with
-   equally good S-boxes. **No weakness relative to a random S-box was found**:
-   on every attack metric we measured, random S-boxes are easier to attack.
+   explained anomaly in the extended differential tables: δ up to 64 in field K
+   and 120 in the hidden field. An attacker who uses the hidden field gains
+   about 4–8 bits in single-characteristic probability at 2–4 rounds. At
+   2 rounds this makes π about 4 bits weaker than a typical random S-box; at
+   3–4 rounds it is typical. The gain belongs to π, not to its pairing with L.
+   It does not appear in the only working attack, where random S-boxes are
+   easier to attack.
 3. **Attack on standard 10 rounds: none.** None is published, and none
    followed from this work. The one family where the structure helps is unusable
    from 3 rounds on.
@@ -385,7 +500,6 @@ The reference cipher (`src/gost/kuznechik.py`) and the tables in
 - Differential clustering (beyond single characteristics) for the c = 02/e1
   classes at 3–4 rounds, compared against A-controls.
 - A larger N1 control (n ≥ 100 per family; about 4 h on 16 cores).
-- Controls with random MDS linear layers of comparable quality.
 - Weak-key and related-key analysis of the key schedule.
 - An independent audit of Streebog's use of π.
 - An independent audit of this repository by a third party.
@@ -406,6 +520,8 @@ python3 experiments/backdoor/sbox_audit.py --n 1000 --seed 5        # A (~1 min)
 python3 experiments/backdoor/layer_keys_audit.py           # B, D
 python3 experiments/backdoor/linear_eigen.py               # B, spectrum of L (~6 min)
 python3 experiments/backdoor/bch_params.py                 # B, design freedom of L (~1 min)
+python3 experiments/interaction/run_stage_f.py --n 200 --seed 2     # F (~10 min)
+python3 experiments/interaction/run_stage_f.py --n 100 --seed 1     # F replication
 ```
 
 ## References
