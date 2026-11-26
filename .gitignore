@@ -9,3 +9,6 @@ pylibs/
 # Virtual environments
 .venv/
 venv/
+
+# Regenerable large artifacts
+results/verify/*.npy
