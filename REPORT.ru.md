@@ -36,7 +36,7 @@ differentials* и предложили атаку с восстановлени�
    получен псевдослучайным поиском с отбором по критериям качества. Перрен
    пишет, что в октябре 2019 года встретился с предполагаемым автором S-box на
    заседании ISO в Париже. Тот настаивал на случайности и заявил, что программа
-   генерации утеряна (`papers/perrin_faq.html`). Заявленная процедура крайне
+   генерации утеряна [who.paris.inria.fr/Leo.Perrin/pi.html](https://who.paris.inria.fr/Leo.Perrin/pi.html). Заявленная процедура крайне
    плохо согласуется с обнаруженной структурой. Но без реального генератора
    это сильное косвенное свидетельство, а не доказательство обмана.
 3. **Прецедент.** История Dual_EC_DRBG показала, что необъяснённая структура в
@@ -278,10 +278,10 @@ python3 experiments/verify/check_controls.py              # проверка к�
 ## Литература
 
 - A. Biryukov, L. Perrin, A. Udovenko. *Reverse-Engineering the S-Box of
-  Streebog, Kuznyechik and STRIBOBr1.* EUROCRYPT 2016 (`papers/bpu2016*.pdf`).
+  Streebog, Kuznyechik and STRIBOBr1.* EUROCRYPT 2016 [ePrint 2016/071](https://eprint.iacr.org/2016/071).
 - L. Perrin. *Partitions in the S-Box of Streebog and Kuznyechik.* ToSC 2019(1),
-  IACR ePrint 2019/092 (`papers/2019-092.pdf`, `papers/perrin2019*.pdf`).
-- L. Perrin. FAQ о S-box π (`papers/perrin_faq.html`).
+  IACR ePrint 2019/092 [ePrint 2019/092](https://eprint.iacr.org/2019/092).
+- L. Perrin. FAQ о S-box π [who.paris.inria.fr/Leo.Perrin/pi.html](https://who.paris.inria.fr/Leo.Perrin/pi.html).
 - P. Stanica, R. Dutta, B. Mandal. *Extended Differential Cryptanalysis of
-  Kuznyechik.* arXiv:2507.02181v4 (`papers/stanica2025.pdf`).
-- RFC 7801, *GOST R 34.12-2015: Block Cipher "Kuznyechik"*.
+  Kuznyechik.* arXiv:2507.02181v4 [arXiv:2507.02181](https://arxiv.org/abs/2507.02181).
+- [RFC 7801](https://www.rfc-editor.org/rfc/rfc7801), *GOST R 34.12-2015: Block Cipher "Kuznyechik"*.

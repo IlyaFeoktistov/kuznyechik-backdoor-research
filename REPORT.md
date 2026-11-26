@@ -36,7 +36,7 @@ code, seeds and raw output in this repository.
    came from a pseudo-random search filtered by quality criteria. Perrin reports
    meeting the alleged designer at an ISO meeting in Paris in October 2019. The
    designer kept the randomness claim and said the generating program had been
-   lost (`papers/perrin_faq.html`). The stated procedure fits the structure that
+   lost [who.paris.inria.fr/Leo.Perrin/pi.html](https://who.paris.inria.fr/Leo.Perrin/pi.html). The stated procedure fits the structure that
    was found very poorly. Without the real generator, though, this is strong
    circumstantial evidence and not a proof of deception.
 3. **Precedent.** Dual_EC_DRBG showed that unexplained structure in
@@ -273,10 +273,10 @@ python3 experiments/verify/check_controls.py              # control sanity, slow
 ## References
 
 - A. Biryukov, L. Perrin, A. Udovenko. *Reverse-Engineering the S-Box of
-  Streebog, Kuznyechik and STRIBOBr1.* EUROCRYPT 2016 (`papers/bpu2016*.pdf`).
+  Streebog, Kuznyechik and STRIBOBr1.* EUROCRYPT 2016 [ePrint 2016/071](https://eprint.iacr.org/2016/071).
 - L. Perrin. *Partitions in the S-Box of Streebog and Kuznyechik.* ToSC 2019(1),
-  IACR ePrint 2019/092 (`papers/2019-092.pdf`, `papers/perrin2019*.pdf`).
-- L. Perrin. FAQ on the S-box π (`papers/perrin_faq.html`).
+  IACR ePrint 2019/092 [ePrint 2019/092](https://eprint.iacr.org/2019/092).
+- L. Perrin. FAQ on the S-box π [who.paris.inria.fr/Leo.Perrin/pi.html](https://who.paris.inria.fr/Leo.Perrin/pi.html).
 - P. Stanica, R. Dutta, B. Mandal. *Extended Differential Cryptanalysis of
-  Kuznyechik.* arXiv:2507.02181v4 (`papers/stanica2025.pdf`).
-- RFC 7801, *GOST R 34.12-2015: Block Cipher "Kuznyechik"*.
+  Kuznyechik.* arXiv:2507.02181v4 [arXiv:2507.02181](https://arxiv.org/abs/2507.02181).
+- [RFC 7801](https://www.rfc-editor.org/rfc/rfc7801), *GOST R 34.12-2015: Block Cipher "Kuznyechik"*.
